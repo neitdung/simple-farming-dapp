@@ -34,25 +34,25 @@ impl Contract {
         self.outdated_farms.len()
     }
 
-    pub fn list_farms(&self, from_index: u64, limit: u64) -> Vec<Farm> {
-        let keys = self.farms.keys_as_vector();
+    // pub fn list_farms(&self, from_index: u64, limit: u64) -> Vec<Farm> {
+    //     let keys = self.farms.keys_as_vector();
 
-        (from_index..std::cmp::min(from_index + limit, keys.len()))
-            .map(|index| 
-                (&self.farms.get(&keys.get(index).unwrap())
-            )
-            .collect()
-    }
+    //     (from_index..std::cmp::min(from_index + limit, keys.len()))
+    //         .map(|index| 
+    //             (&self.farms.get(&keys.get(index).unwrap())
+    //         )
+    //         .collect()
+    // }
 
-    pub fn list_outdated_farms(&self, from_index: u64, limit: u64) -> Vec<Farm> {
-        let keys = self.outdated_farms.keys_as_vector();
+    // pub fn list_outdated_farms(&self, from_index: u64, limit: u64) -> Vec<Farm> {
+    //     let keys = self.outdated_farms.keys_as_vector();
 
-        (from_index..std::cmp::min(from_index + limit, keys.len()))
-            .map(|index|
-                (&self.outdated_farms.get(&keys.get(index).unwrap())
-            )
-            .collect()
-    }
+    //     (from_index..std::cmp::min(from_index + limit, keys.len()))
+    //         .map(|index|
+    //             (&self.outdated_farms.get(&keys.get(index).unwrap())
+    //         )
+    //         .collect()
+    // }
 }
 
 impl Contract {
@@ -183,7 +183,7 @@ impl Contract {
         let farm = Farm::new(
             farm_id.clone(),
             terms.into(),
-        ));
+        );
         
         seed.farms.insert(farm_id.clone());
         seed.next_index += 1;

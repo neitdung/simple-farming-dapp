@@ -26,6 +26,6 @@ impl Farmer {
             staking: UnorderedMap::new(StorageKeys::FarmerStaking {
                 account_id: farmer_id.clone()
             }),
-        })
+        }
     }
 }
