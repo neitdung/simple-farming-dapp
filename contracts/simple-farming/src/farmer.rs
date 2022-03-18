@@ -1,33 +1,31 @@
 use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
-use near_sdk::{AccountId, Balance};
-use std::collections::HashMap;
-use near_sdk::collections::LookupMap;
+use near_sdk::{AccountId, Balance, Timestamp};
+use near_sdk::collections::UnorderedMap;
 use crate::StorageKeys;
-use crate::{SeedId, FarmId, RPS};
+use crate::{SeedId, FarmId};
 
 
 #[derive(BorshSerialize, BorshDeserialize)]
+pub struct StakeInfo {
+    pub staked_at: Timestamp,
+    pub amount: Balance,
+}
+
+#[derive(BorshSerialize, BorshDeserialize)]
 pub struct Farmer {
-    amount: Balance,
-    /// Amounts of various reward tokens the farmer claimed.
-    rewards: HashMap<SeedId, Balance>,
-    /// Amounts of various seed tokens the farmer staked.
-    seeds: HashMap<SeedId, Balance>,
-    /// record user_last_rps of farms
-    user_rps: LookupMap<FarmId, RPS>,
-    rps_count: u32
+    claimed: UnorderedMap<SeedId, Balance>,
+    staking: UnorderedMap<FarmId, StakeInfo>
 }
 
 impl Farmer {
-    pub fn new(farmer_id: AccountId, amount: Balance) -> Self {
+    pub fn new(farmer_id: AccountId) -> Self {
         Self {
-            amount: amount,
-            rewards: HashMap::new(),
-            seeds: HashMap::new(),
-            user_rps: LookupMap::new(StorageKeys::UserRPS {
+            claimed: UnorderedMap::new(StorageKeys::FarmerClaimed {
                 account_id: farmer_id.clone(),
             }),
-            rps_count: 0,
+            staking: UnorderedMap::new(StorageKeys::FarmerStaking {
+                account_id: farmer_id.clone()
+            }),
         })
     }
 }
