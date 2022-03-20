@@ -1,5 +1,5 @@
-use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
-use near_sdk::{AccountId, Balance};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::{AccountId};
 use std::collections::HashSet;
 use crate::farm::FarmId;
 
@@ -7,9 +7,9 @@ pub(crate) type SeedId = AccountId;
 
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct Seed {
-    seed_id: SeedId,
-    farms: HashSet<FarmId>,
-    next_index: u32,
+    pub seed_id: SeedId,
+    pub farms: HashSet<FarmId>,
+    pub next_index: u32,
 }
 
 impl Seed {

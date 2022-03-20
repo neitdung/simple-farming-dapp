@@ -1,8 +1,8 @@
-use near_sdk::json_types::{ValidAccountId, U128, U64};
-use near_sdk::{Promise};
+use std::convert::TryInto;
+use near_sdk::json_types::{U128};
+use near_sdk::{Promise, Balance};
 
 use crate::utils::{ext_ft, GAS_FOR_FT_TRANSFER};
-use crate::errors::*;
 use crate::*;
 
 impl Contract {
@@ -13,10 +13,10 @@ impl Contract {
         seed_id: &SeedId,
     ) -> Promise {
         ext_ft::ft_transfer(
-            sender_id,
-            U128(amount),
+            sender_id.clone().try_into().unwrap(),
+            amount.to_string(),
+            None,            
             seed_id,
-            None,
             1,
             GAS_FOR_FT_TRANSFER
         )

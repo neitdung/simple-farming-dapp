@@ -1,4 +1,4 @@
-use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{AccountId, Balance, Timestamp};
 use near_sdk::collections::UnorderedMap;
 use crate::StorageKeys;
@@ -13,8 +13,8 @@ pub struct StakeInfo {
 
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct Farmer {
-    claimed: UnorderedMap<SeedId, Balance>,
-    staking: UnorderedMap<FarmId, StakeInfo>
+    pub claimed: UnorderedMap<SeedId, Balance>,
+    pub staking: UnorderedMap<FarmId, StakeInfo>
 }
 
 impl Farmer {

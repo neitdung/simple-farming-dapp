@@ -1,4 +1,4 @@
-use near_sdk::borsh::{BorshDeserialize, BorshSerialize};
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{AccountId, Balance, Timestamp};
 use crate::SeedId;
 
@@ -6,7 +6,7 @@ pub(crate) type FarmId = String;
 
 #[derive(BorshSerialize, BorshDeserialize, Clone)]
 pub enum Status {
-    Created, Running, Ended, Cleared
+    Created, Running, Ended
 }
 
 impl From<&Status> for String {
@@ -40,7 +40,7 @@ pub struct Farm {
 }
 
 impl Farm {
-    pub(crate) new(
+    pub(crate) fn new(
         owner_id: AccountId,
         farm_id: FarmId,
         terms: Terms
@@ -49,7 +49,7 @@ impl Farm {
             owner_id: owner_id,
             farm_id: farm_id.clone(),
             terms: terms,
-            status: Status::from("Created"),
+            status: Status::Created,
             staking: 0,
             amount_of_claimed: 0,
             amount_of_reward: 0
@@ -58,7 +58,7 @@ impl Farm {
 
     pub fn set_ended(&mut self, amount: Option<Balance>) {
         self.amount_of_reward = 0;
-        self.amount_of_claimed += Some(amount);
-        self.status = Status::from("Ended");
+        self.amount_of_claimed += amount.unwrap_or_else(|| 0);
+        self.status = Status::Ended;
     }
 }

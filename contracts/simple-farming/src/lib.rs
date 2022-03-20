@@ -1,25 +1,22 @@
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::LookupMap;
-use near_sdk::{env, near_bindgen, Promise};
-use crate::utils::{ext_ft, GAS_FOR_FT_TRANSFER};
+use near_sdk::collections::{LookupMap, UnorderedMap};
+use near_sdk::{near_bindgen, PanicOnDefault, AccountId, BorshStorageKey};
+use near_sdk::json_types::{ValidAccountId};
 use crate::actions_of_farm::*;
-use crate::actions_of_reward::*;
-use crate::actions_of_seed::*;
-use crate::farm_seed::*;
+use crate::seed::*;
 use crate::farmer::*;
 use crate::farm::*;
 near_sdk::setup_alloc!();
 
 mod actions_of_farm;
 mod actions_of_reward;
-mod actions_of_seed;
-mod farm_seed;
+mod seed;
 mod farmer;
 mod farm;
 mod utils;
 
-pub(crate) const INDEX_HASHTAG = "#";
+pub(crate) const INDEX_HASHTAG: &str = "#";
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
