@@ -1,5 +1,4 @@
 use near_sdk::{env, ext_contract, Gas};
-use near_contract_standards::storage_management::StorageBalance;
 use crate::{FarmId};
 pub const GAS_FOR_FT_TRANSFER: Gas = 10_000_000_000_000;
 pub const DENOM: u128 = 1_000_000_000_000_000_000_000_000;
@@ -13,6 +12,11 @@ trait FungibleToken {
     // view methods
     fn ft_total_supply(&self) -> String;
     fn ft_balance_of(&self, account_id: String) -> String;
+
+    fn storage_deposit(
+        account_id: String,
+        registration_only: bool
+    ) -> StorageBalance;
     fn storage_balance_of(account_id: String) -> StorageBalance;
 }
 

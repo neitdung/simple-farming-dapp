@@ -6,8 +6,6 @@ use std::convert::TryInto;
 
 use near_sdk::json_types::{ValidAccountId, U128};
 use near_sdk::{assert_one_yocto, env, near_bindgen, Promise};
-
-use crate::errors::*;
 use crate::*;
 
 pub const STORAGE_BALANCE_MIN_BOUND: u128 = 100_000_000_000_000_000_000_000;
@@ -28,7 +26,7 @@ impl StorageManagement for Contract {
             .unwrap_or_else(|| env::predecessor_account_id());
         let already_registered = self.farmers.contains_key(&account_id);
         if amount < STORAGE_BALANCE_MIN_BOUND && !already_registered {
-            env::panic("Not deposit enough storage").as_bytes());
+            env::panic("Not deposit enough storage".as_bytes());
         }
 
         if already_registered {
@@ -50,7 +48,10 @@ impl StorageManagement for Contract {
     #[payable]
     fn storage_withdraw(&mut self, amount: Option<U128>) -> StorageBalance {
         assert_one_yocto();
-        env::panic("Cannot withdraw storage").as_bytes());
+
+        let account_id = env::predecessor_account_id();
+        Promise::new(account_id.clone()).transfer(amount.unwrap().into());
+        self.storage_balance_of(account_id.try_into().unwrap()).unwrap()
     }
 
     #[allow(unused_variables)]
@@ -63,12 +64,6 @@ impl StorageManagement for Contract {
 
         let account_id = env::predecessor_account_id();
         if let Some(farmer) = self.farmers.get(&account_id) {
-            
-            assert!(
-                farmer.rewards.is_empty(),
-                "Your reward is not empty"
-            );
-
             // todo: how about his rps lookup map? maybe already cleaned when unstake all seeds
             self.farmers.remove(&account_id);
             self.farmer_count -= 1;

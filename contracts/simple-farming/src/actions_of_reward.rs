@@ -1,5 +1,4 @@
 use std::convert::TryInto;
-use near_sdk::json_types::{U128};
 use near_sdk::{Promise, Balance};
 
 use crate::utils::{ext_ft, GAS_FOR_FT_TRANSFER};

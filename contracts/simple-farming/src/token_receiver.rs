@@ -1,18 +1,9 @@
-use crate::farm::Terms;
 use near_sdk::json_types::U128;
-use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{serde_json, PromiseOrValue};
+use near_sdk::{PromiseOrValue, env};
 
 use near_contract_standards::fungible_token::receiver::FungibleTokenReceiver;
+use crate::*;
 
-/// Message parameters to receive via token function call.
-#[derive(Serialize, Deserialize)]
-#[serde(crate = "near_sdk::serde")]
-struct TokenReceiverMessage {
-    action: String,
-    terms: Option<Terms>, 
-    min_deposit: Option<U128>
-}
 
 #[near_bindgen]
 impl FungibleTokenReceiver for Contract {
@@ -27,13 +18,17 @@ impl FungibleTokenReceiver for Contract {
     ) -> PromiseOrValue<U128> {
         let sender: AccountId = sender_id.into();
         let amount: u128 = amount.into();
+        let seed_id = env::predecessor_account_id();
         if !msg.is_empty() {
-            let message = serde_json::from_str::<TokenReceiverMessage>(&msg).expect("Wrong formeat!!!");
-            match message.action.as_str() {
-                "create_farm" => self.create_farm(message.terms.into(), message.min_deposit),
-            }
-            message.action
+            let msg_transfer = format!("{}:{}:{}", seed_id, amount, msg);
+            self.internal_add_call(sender, msg_transfer);
         }
-        String::from("No action found")
+        PromiseOrValue::Value(U128(0))
     }
+}
+
+impl Contract {
+    pub fn internal_add_call(&mut self, sender_id: String, call: String) {
+        self.account_calls.insert(&sender_id, &call);
+    } 
 }

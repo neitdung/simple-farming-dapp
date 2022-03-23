@@ -1,12 +1,12 @@
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LookupMap, UnorderedMap};
-use near_sdk::{near_bindgen, PanicOnDefault, AccountId, BorshStorageKey};
+use near_sdk::{near_bindgen, PanicOnDefault, AccountId, BorshStorageKey, Promise, Gas, env};
 use near_sdk::json_types::{ValidAccountId};
-use crate::actions_of_farm::*;
 use crate::seed::*;
 use crate::farmer::*;
 use crate::farm::*;
+use crate::utils::{ext_ft};
 near_sdk::setup_alloc!();
 
 mod actions_of_farm;
@@ -15,8 +15,9 @@ mod seed;
 mod farmer;
 mod farm;
 mod utils;
-
-pub(crate) const INDEX_HASHTAG: &str = "#";
+mod token_receiver;
+mod storage_impl;
+pub const GAS_FOR_FT_DEPOSIT: Gas = 10_000_000_000_000;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -33,8 +34,7 @@ pub struct Contract {
     farmers: LookupMap<AccountId, Farmer>,
 
     farms: UnorderedMap<FarmId, Farm>,
-    outdated_farms: UnorderedMap<FarmId, Farm>,
-
+    account_calls: UnorderedMap<AccountId, String>,
     // for statistic
     farmer_count: u64
 }
@@ -42,9 +42,9 @@ pub struct Contract {
 #[derive(BorshStorageKey, BorshSerialize)]
 pub enum StorageKeys {
     Farm,
-    OutdatedFarm,
     Seed,
     Farmer,
+    AccountCall,
     FarmerClaimed { account_id: AccountId },
     FarmerStaking { account_id: AccountId }
 }
@@ -59,7 +59,26 @@ impl Contract {
             seeds: UnorderedMap::new(StorageKeys::Seed),
             farmers: LookupMap::new(StorageKeys::Farmer),
             farms: UnorderedMap::new(StorageKeys::Farm),
-            outdated_farms: UnorderedMap::new(StorageKeys::OutdatedFarm)
+            account_calls: UnorderedMap::new(StorageKeys::AccountCall)
         }
+    }
+
+    #[payable]
+    pub fn ft_deposit(&mut self, ft_account: ValidAccountId) -> Promise {
+        assert!(env::attached_deposit() >= 1250000000000000000000, "You need attach more yocto");
+        ext_ft::storage_deposit(
+            self.owner_id.clone(),
+            true,
+            &ft_account,
+            1250000000000000000000,
+            GAS_FOR_FT_DEPOSIT,
+        )
+    }
+
+    pub fn view_farmer_exists(&self, account_id: AccountId) -> bool {
+        if let Some(farmer) = self.farmers.get(&account_id) {
+            return true;
+        }
+        return false;
     }
 }
