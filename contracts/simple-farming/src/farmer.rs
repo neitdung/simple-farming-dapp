@@ -4,7 +4,6 @@ use near_sdk::collections::UnorderedMap;
 use crate::StorageKeys;
 use crate::{SeedId, FarmId};
 
-
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct StakeInfo {
     pub staked_at: Timestamp,

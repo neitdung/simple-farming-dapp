@@ -22,6 +22,7 @@ near call contract.simple-farming.testnet create_farm '{"start_at": "0", "reward
 
 ## View farms
 near view contract.simple-farming.testnet list_farms '{"from_index": 0, "limit": 10}'
+near view contract.simple-farming.testnet list_seeds 
 near view ft.neitgnud.testnet ft_balance_of '{"account_id": "contract.simple-farming.testnet"}'
 near view ft.neitgnud.testnet storage_balance_of '{"account_id": "contract.simple-farming.testnet"}'
 

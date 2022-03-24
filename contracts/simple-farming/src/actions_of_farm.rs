@@ -7,7 +7,6 @@ use crate::seed::{Seed};
 use crate::utils::{DENOM, parse_farm_id};
 use crate::*;
 
-
 #[near_bindgen]
 impl Contract {
     #[payable]
@@ -56,6 +55,12 @@ impl Contract {
         }
         String::from("Not found call")
     }
+
+    #[payable]
+    pub fn claim_reward_by_farm(&mut self, farm_id: FarmId) -> U128 {        
+        self.internal_claim_reward_by_farm(farm_id)
+    }
+    
     /// View methods.
     pub fn get_number_of_farms(&self) -> u64 {
         self.farms.len()
@@ -78,6 +83,46 @@ impl Contract {
 }
 
 impl Contract {
+    fn internal_claim_reward_by_farm(&mut self, farm_id: FarmId) -> U128 {
+        let sender_id = env::predecessor_account_id();
+        let new_staked_at = env::block_timestamp();
+        let mut farmer = self.farmers.get(&sender_id).unwrap();
+        let mut farm = self.farms.get(&farm_id).unwrap();
+        let mut will_claim_amount: u128 = 0;
+        assert!(
+            farm.status != Status::Ended,
+            "Farm is ended"
+        );
+        if let Some(mut stake_info) = farmer.staking.get(&farm_id) {
+            let (seed_id, _) = parse_farm_id(&farm_id);
+            if let Some(_seed) = self.seeds.get(&seed_id) {
+                if new_staked_at > farm.terms.start_at {
+                    let remain_amount = farm.amount_of_reward;
+                    will_claim_amount = stake_info.amount / DENOM;
+                    will_claim_amount *= farm.terms.reward_per_session;
+                    will_claim_amount *= (new_staked_at - stake_info.staked_at) as u128 / 10u128.pow(9);
+                    will_claim_amount /= farm.terms.session_interval as u128;
+                    if remain_amount <= will_claim_amount {
+                        self.internal_claim_user_reward(remain_amount, &sender_id, &seed_id);
+                        farm.set_ended(Some(remain_amount));
+                        will_claim_amount = remain_amount;
+                    } else if will_claim_amount > 0 {
+                        self.internal_claim_user_reward(will_claim_amount, &sender_id, &seed_id);
+                        farm.amount_of_claimed += will_claim_amount;
+                        farm.amount_of_reward -= will_claim_amount;
+                        stake_info.staked_at = new_staked_at;
+                        farmer.staking.insert(&farm_id, &stake_info);
+                    }
+                }
+            }
+        } else {
+            env::panic(b"You're not staked on this farm");
+        }
+        self.farmers.insert(&sender_id, &farmer);
+        self.farms.insert(&farm_id, &farm);
+        U128(will_claim_amount)
+    }
+
     fn internal_stake_farm(&mut self, amount: Balance, farm_id: FarmId) {
         let sender_id = env::predecessor_account_id();
         let new_staked_at = env::block_timestamp();

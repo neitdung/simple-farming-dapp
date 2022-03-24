@@ -75,10 +75,14 @@ impl Contract {
         )
     }
 
-    pub fn view_farmer_exists(&self, account_id: AccountId) -> bool {
-        if let Some(farmer) = self.farmers.get(&account_id) {
-            return true;
-        }
-        return false;
+    // pub fn view_farmer_exists(&self, account_id: AccountId) -> bool {
+    //     if let Some(_farmer) = self.farmers.get(&account_id) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
+    pub fn list_seeds(&self) -> Vec<String> {
+        self.seeds.keys_as_vector().to_vec()
     }
 }
